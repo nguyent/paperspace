@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import ast
 import os
 from pprint import pprint
@@ -55,9 +56,19 @@ class ProjectAnalyzer:
     def getImports(self):
         return self.imports
 
+def validatePath(path):
+    if not os.path.isdir(path):
+        raise argparse.ArgumentTypeError("Path must be an existing directory")
+    return path
+
+def parseArguments():
+    parser = argparse.ArgumentParser(description='Find all python files and their imports in a given directory')
+    parser.add_argument('project_path', type=validatePath)
+    return parser.parse_args().project_path
+
 def main():
-    loc = '/Users/thang/work/paperspace/repos/numpy'
-    analyzer = ProjectAnalyzer(loc)
+    projectPath = parseArguments()
+    analyzer = ProjectAnalyzer(projectPath)
     analyzer.analyze()
     pprint(analyzer.getImports())
 
