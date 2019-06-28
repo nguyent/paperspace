@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import ast
 import os
 
 def getAllPythonFiles(path):
@@ -14,4 +15,12 @@ def getAllPythonFiles(path):
                 yield entry.path
 
 loc = '/Users/thang/work/paperspace/repos/numpy'
-print(getAllPythonFiles(loc))
+
+f = '/Users/thang/work/paperspace/repos/numpy/runtests.py'
+
+# An abs file path
+def getAST(filePath):
+    with open(filePath) as f:
+        return ast.parse(f.read())
+
+print(getAST(f))
