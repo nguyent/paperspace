@@ -2,21 +2,7 @@
 
 import ast
 import os
-
-def getAllPythonFiles(path):
-    folders = [path]
-
-    while folders:
-        folder = folders.pop()
-        for entry in os.scandir(folder):
-            if entry.is_dir():
-                folders.append(entry.path)
-            elif entry.is_file() and entry.path[-3:] == '.py':
-                yield entry.path
-
-def getAST(filePath):
-    with open(filePath, 'rb') as f:
-        return ast.parse(f.read())
+from pprint import pprint
 
 # via: https://docs.python.org/3/library/ast.html#ast.NodeVisitor
 class ImportNodeVisitor(ast.NodeVisitor):
@@ -34,21 +20,46 @@ class ImportNodeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def getImports(self):
+        return sorted(list(self.imports), key = lambda x: x.lower())
+
+class ProjectAnalyzer:
+    def __init__(self, projectPath):
+        self.path = projectPath
+        self.imports = {}
+
+    def getAST(filePath):
+        with open(filePath, 'r') as f:
+            return ast.parse(f.read())
+
+    def getAllPythonFiles(self):
+        folders = [self.path]
+
+        while folders:
+            folder = folders.pop()
+            for entry in os.scandir(folder):
+                if entry.is_dir():
+                    folders.append(entry.path)
+                elif entry.is_file() and entry.path[-3:] == '.py':
+                    yield entry.path
+
+    def processFile(self, filePath):
+        tree = ProjectAnalyzer.getAST(filePath)
+        visitor = ImportNodeVisitor()
+        visitor.visit(tree)
+        self.imports[filePath] = visitor.getImports()
+
+    def analyze(self):
+        for filePath in self.getAllPythonFiles():
+            self.processFile(filePath)
+
+    def getImports(self):
         return self.imports
 
 def main():
     loc = '/Users/thang/work/paperspace/repos/numpy'
-    out = {}
-
-    for filepath in getAllPythonFiles(loc):
-        if 'usr' in filepath:
-            import pdb; pdb.set_trace()
-        tree = getAST(filepath)
-        visitor = ImportNodeVisitor()
-        visitor.visit(tree)
-        out[filepath] = visitor.getImports()
-
-    print(out)
+    analyzer = ProjectAnalyzer(loc)
+    analyzer.analyze()
+    pprint(analyzer.getImports())
 
 if __name__ == '__main__':
     main()
