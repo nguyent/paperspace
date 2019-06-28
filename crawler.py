@@ -20,22 +20,19 @@ def getAST(filePath):
     with open(filePath) as f:
         return ast.parse(f.read())
 
-
 # via: https://docs.python.org/3/library/ast.html#ast.NodeVisitor
-
 class ImportNodeVisitor(ast.NodeVisitor):
     def __init__(self):
-        self.imports = {
-            'import': [],
-            'from': []
-        }
+        self.imports = set()
 
     def visit_Import(self, node):
-        self.imports['import'].extend(node.names)
+        for ast_alias in node.names:
+            self.imports.add(ast_alias.name)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
-        self.imports['from'].extend(node.names)
+        for ast_alias in node.names:
+            self.imports.add("{}.{}".format(node.module, ast_alias.name))
         self.generic_visit(node)
 
     def getImports(self):
@@ -47,7 +44,8 @@ def main():
 
     visitor = ImportNodeVisitor()
     visitor.visit(tree)
-    print(visitor.getImports())
+    x = visitor.getImports()
+    print(x)
 
 if __name__ == '__main__':
     main()
