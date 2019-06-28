@@ -11,7 +11,7 @@ def getAllPythonFiles(path):
         for entry in os.scandir(folder):
             if entry.is_dir():
                 folders.append(entry.path)
-            elif entry.is_file() and entry.path[-2:] == 'py':
+            elif entry.is_file() and entry.path[-3:] == '.py':
                 yield entry.path
 
 def getAST(filePath):
