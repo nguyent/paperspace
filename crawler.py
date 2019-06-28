@@ -14,10 +14,8 @@ def getAllPythonFiles(path):
             elif entry.is_file() and entry.path[-2:] == 'py':
                 yield entry.path
 
-loc = '/Users/thang/work/paperspace/repos/numpy'
-
 def getAST(filePath):
-    with open(filePath) as f:
+    with open(filePath, 'rb') as f:
         return ast.parse(f.read())
 
 # via: https://docs.python.org/3/library/ast.html#ast.NodeVisitor
@@ -39,13 +37,18 @@ class ImportNodeVisitor(ast.NodeVisitor):
         return self.imports
 
 def main():
-    f = '/Users/thang/work/paperspace/repos/numpy/runtests.py'
-    tree = getAST(f)
+    loc = '/Users/thang/work/paperspace/repos/numpy'
+    out = {}
 
-    visitor = ImportNodeVisitor()
-    visitor.visit(tree)
-    x = visitor.getImports()
-    print(x)
+    for filepath in getAllPythonFiles(loc):
+        if 'usr' in filepath:
+            import pdb; pdb.set_trace()
+        tree = getAST(filepath)
+        visitor = ImportNodeVisitor()
+        visitor.visit(tree)
+        out[filepath] = visitor.getImports()
+
+    print(out)
 
 if __name__ == '__main__':
     main()
